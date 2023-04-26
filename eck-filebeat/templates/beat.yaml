@@ -22,8 +22,10 @@ spec:
               paths:
               - /var/log/containers/*${data.kubernetes.container.id}.log
     processors:
-    - add_cloud_metadata: {}
-    - add_host_metadata: {}
+      - add_cloud_metadata: {}
+      - add_host_metadata: {}
+    output.logstash:
+      hosts: [ logstash-logstash:5044 ]
   daemonSet:
     podTemplate:
       spec:
