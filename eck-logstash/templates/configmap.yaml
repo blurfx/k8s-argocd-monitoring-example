@@ -23,19 +23,27 @@ data:
       }
     }
     filter {
-      grok {
-        match => { "message" => "%{COMBINEDAPACHELOG}"}
+      mutate {
+        remove_field => [ "agent", "container", "ecs", "event", "input", "log", "tags" ]
       }
-      geoip {
-        source => "clientip"
-        target => "clientgeo"
+      mutate {
+        rename => {
+          "[host][name]" => "node"
+          "[kubernetes][namespace]" => "namespace"
+          "[kubernetes][pod][name]" => "pod"
+          "[kubernetes][container][name]" => "container"
+        }
+      }
+      mutate {
+        remove_field => [ "host", "kubernetes" ]
       }
     }
     output {
       elasticsearch {
-        hosts => [ "${ES_HOSTS}" ]
-        user => "${ES_USER}"
-        password => "${ES_PASSWORD}"
-        cacert => '/etc/logstash/certificates/ca.crt'
+        hosts => [ "https://eck-elasticsearch-es-http:9200" ]
+        ssl_certificate_verification => false
+        user => "elastic"
+        password => "${elastic}"
+        index => "stdout" 
       }
     }
